@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Store</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .fontstyle {
+            font-size: 24px;
+            color: #007bff;
+            margin: 0;
+        }
+        .btn {
+            text-decoration: none;
+            color: #fff;
+            background-color: #007bff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .table th, .table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .center {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination li {
+            list-style: none;
+            margin: 0 5px;
+        }
+        .pagination li a {
+            text-decoration: none;
+            color: #007bff;
+            padding: 6px 12px;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+        }
+        .pagination li a:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        #search {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2 class="fontstyle">MEDICAL STORE</h2>
+            <a href="{% url 'logout' %}" class="btn">Logout</a>
+        </div>
+        <a href="{% url 'add_medicine' %}" class="btn">Add Medicine</a>
+        <input type="text" id="search" name="search_term" placeholder="Search medicines...">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Stocks</th>
+                    <th>Date and Time</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="medicine-table-body">
+                {% for medicine in medicines %}
+                <tr>
+                    <td>{{ medicine.id }}</td>
+                    <td>{{ medicine.name }}</td>
+                    <td>{{ medicine.stocks }}</td>
+                    <td>{{ medicine.date_and_time }}</td>
+                    <td><a href="{% url 'update_med' medicine.id %}" class="btn btn-secondary">Update</a></td>
+                    <td><a href="{% url 'delete_med' medicine.id %}" class="btn btn-secondary">Delete</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="center">
+            <ul>
+                {% for product in page_obj %}
+                <li>{{ product.name|upper }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if medicines.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ medicines.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                {% for num in medicines.paginator.page_range %}
+                    <li class="page-item {% if medicines.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endfor %}
+                {% if medicines.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ medicines.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#search').keyup(function() {
+                let searchTerm = $(this).val();
+                $.ajax({
+                    url: "{% url 'search_medicines' %}",
+                    type: 'GET',
+                    data: {
+                        'search_term': searchTerm
+                    },
+                    success: function(data) {
+                        $('#medicine-table-body').html(data);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
